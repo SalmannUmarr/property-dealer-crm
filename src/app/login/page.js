@@ -38,34 +38,48 @@ export default function LoginPage() {
     }
 
     return (
-        <main className="min-h-screen flex items-center justify-center bg-gray-100">
+        <main className="min-h-screen flex items-center justify-center bg-slate-100 px-4">
             <form
                 onSubmit={handleSubmit}
-                className="bg-white p-8 rounded-xl shadow-md w-full max-w-md space-y-4"
+                className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md space-y-5 border border-gray-200"
             >
-                <h1 className="text-2xl font-bold">Login</h1>
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Login</h1>
+                    <p className="text-gray-600 mt-1">Access your CRM dashboard</p>
+                </div>
 
                 <input
-                    className="w-full border p-3 rounded"
-                    placeholder="Email"
+                    className="w-full border border-gray-300 p-3 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black"
+                    placeholder="Email address"
                     type="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                 />
 
                 <input
-                    className="w-full border p-3 rounded"
+                    className="w-full border border-gray-300 p-3 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black"
                     placeholder="Password"
                     type="password"
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
                 />
 
-                <button className="w-full bg-black text-white p-3 rounded">
+                <button className="w-full bg-black hover:bg-gray-800 text-white p-3 rounded-lg font-semibold">
                     Login
                 </button>
 
-                {message && <p className="text-sm text-center">{message}</p>}
+                {message && (
+                    <p className="text-sm text-center text-red-600 font-medium">
+                        {message}
+                    </p>
+                )}
+
+                <p className="text-center text-sm text-gray-600">
+                    Don&apos;t have an account?{" "}
+                    <a href="/signup" className="font-semibold text-black underline">
+                        Signup
+                    </a>
+                </p>
             </form>
         </main>
     );

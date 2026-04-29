@@ -37,30 +37,33 @@ export default function SignupPage() {
     }
 
     return (
-        <main className="min-h-screen flex items-center justify-center bg-gray-100">
+        <main className="min-h-screen flex items-center justify-center bg-slate-100 px-4">
             <form
                 onSubmit={handleSubmit}
-                className="bg-white p-8 rounded-xl shadow-md w-full max-w-md space-y-4"
+                className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md space-y-5 border border-gray-200"
             >
-                <h1 className="text-2xl font-bold">Create Account</h1>
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Create Account</h1>
+                    <p className="text-gray-600 mt-1">Register a CRM user</p>
+                </div>
 
                 <input
-                    className="w-full border p-3 rounded"
-                    placeholder="Name"
+                    className="w-full border border-gray-300 p-3 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black"
+                    placeholder="Full name"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                 />
 
                 <input
-                    className="w-full border p-3 rounded"
-                    placeholder="Email"
+                    className="w-full border border-gray-300 p-3 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black"
+                    placeholder="Email address"
                     type="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                 />
 
                 <input
-                    className="w-full border p-3 rounded"
+                    className="w-full border border-gray-300 p-3 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-black"
                     placeholder="Password"
                     type="password"
                     value={form.password}
@@ -68,7 +71,7 @@ export default function SignupPage() {
                 />
 
                 <select
-                    className="w-full border p-3 rounded"
+                    className="w-full border border-gray-300 p-3 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-black"
                     value={form.role}
                     onChange={(e) => setForm({ ...form, role: e.target.value })}
                 >
@@ -76,11 +79,22 @@ export default function SignupPage() {
                     <option value="admin">Admin</option>
                 </select>
 
-                <button className="w-full bg-black text-white p-3 rounded">
+                <button className="w-full bg-black hover:bg-gray-800 text-white p-3 rounded-lg font-semibold">
                     Signup
                 </button>
 
-                {message && <p className="text-sm text-center">{message}</p>}
+                {message && (
+                    <p className="text-sm text-center text-blue-700 font-medium">
+                        {message}
+                    </p>
+                )}
+
+                <p className="text-center text-sm text-gray-600">
+                    Already have an account?{" "}
+                    <a href="/login" className="font-semibold text-black underline">
+                        Login
+                    </a>
+                </p>
             </form>
         </main>
     );
