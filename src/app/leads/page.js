@@ -212,6 +212,13 @@ export default function LeadsPage() {
                                     >
                                         WhatsApp Lead
                                     </a>
+
+                                    <a
+                                        className="block mt-3 bg-black text-white text-center p-2 rounded"
+                                        href={`/leads/${lead._id}`}
+                                    >
+                                        View Timeline
+                                    </a>
                                 </div>
                             </div>
                         </div>
