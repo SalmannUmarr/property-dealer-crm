@@ -1,12 +1,17 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 async function getAnalytics() {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
 
-    const res = await fetch(`${baseUrl}/api/analytics`, {
+    const res = await fetch("http://localhost:3000/api/analytics", {
         cache: "no-store",
+        headers: {
+            Cookie: `token=${token}`,
+        },
     });
 
     if (!res.ok) {
@@ -25,13 +30,22 @@ export default async function AdminDashboard() {
     const analytics = await getAnalytics();
 
     const totalLeads = analytics?.totalLeads || 0;
+
     const priorityCounts = analytics?.priorityCounts || {
         High: 0,
         Medium: 0,
         Low: 0,
     };
 
-    const statusCounts = analytics?.statusCounts || {};
+    const statusCounts = analytics?.statusCounts || {
+        New: 0,
+        Assigned: 0,
+        Contacted: 0,
+        "In Progress": 0,
+        Closed: 0,
+        Lost: 0,
+    };
+
     const agentPerformance = analytics?.agentPerformance || [];
 
     return (
@@ -78,10 +92,7 @@ export default async function AdminDashboard() {
 
                     <div className="space-y-3">
                         {Object.entries(statusCounts).map(([status, count]) => (
-                            <div
-                                key={status}
-                                className="flex justify-between border-b pb-2"
-                            >
+                            <div key={status} className="flex justify-between border-b pb-2">
                                 <span>{status}</span>
                                 <span className="font-bold">{count}</span>
                             </div>
@@ -94,10 +105,7 @@ export default async function AdminDashboard() {
 
                     <div className="space-y-3">
                         {Object.entries(priorityCounts).map(([priority, count]) => (
-                            <div
-                                key={priority}
-                                className="flex justify-between border-b pb-2"
-                            >
+                            <div key={priority} className="flex justify-between border-b pb-2">
                                 <span>{priority}</span>
                                 <span className="font-bold">{count}</span>
                             </div>
