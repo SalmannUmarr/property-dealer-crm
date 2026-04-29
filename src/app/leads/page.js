@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 export default function LeadsPage() {
+    const [currentUser, setCurrentUser] = useState(null);
     const [leads, setLeads] = useState([]);
     const [agents, setAgents] = useState([]);
     const [message, setMessage] = useState("");
@@ -14,6 +15,16 @@ export default function LeadsPage() {
         propertyInterest: "",
         budget: "",
     });
+
+    async function fetchCurrentUser() {
+        const res = await fetch("/api/auth/me", {
+            credentials: "include",
+            cache: "no-store",
+        });
+
+        const data = await res.json();
+        setCurrentUser(data.user || null);
+    }
 
     async function fetchLeads() {
         const res = await fetch("/api/leads", {
@@ -36,6 +47,7 @@ export default function LeadsPage() {
     }
 
     useEffect(() => {
+        fetchCurrentUser();
         fetchLeads();
         fetchAgents();
     }, []);
@@ -100,51 +112,53 @@ export default function LeadsPage() {
                 </div>
             )}
 
-            <form
-                onSubmit={handleSubmit}
-                className="bg-white p-6 rounded-xl shadow mb-6 grid grid-cols-1 md:grid-cols-2 gap-4"
-            >
-                <input
-                    className="border border-gray-300 p-3 rounded text-gray-900"
-                    placeholder="Name"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                />
+            {currentUser?.role === "admin" && (
+                <form
+                    onSubmit={handleSubmit}
+                    className="bg-white p-6 rounded-xl shadow mb-6 grid grid-cols-1 md:grid-cols-2 gap-4"
+                >
+                    <input
+                        className="border border-gray-300 p-3 rounded text-gray-900"
+                        placeholder="Name"
+                        value={form.name}
+                        onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    />
 
-                <input
-                    className="border border-gray-300 p-3 rounded text-gray-900"
-                    placeholder="Email"
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                />
+                    <input
+                        className="border border-gray-300 p-3 rounded text-gray-900"
+                        placeholder="Email"
+                        value={form.email}
+                        onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    />
 
-                <input
-                    className="border border-gray-300 p-3 rounded text-gray-900"
-                    placeholder="Phone e.g. 923001234567"
-                    value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                />
+                    <input
+                        className="border border-gray-300 p-3 rounded text-gray-900"
+                        placeholder="Phone e.g. 923001234567"
+                        value={form.phone}
+                        onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    />
 
-                <input
-                    className="border border-gray-300 p-3 rounded text-gray-900"
-                    placeholder="Property Interest e.g. House in DHA"
-                    value={form.propertyInterest}
-                    onChange={(e) =>
-                        setForm({ ...form, propertyInterest: e.target.value })
-                    }
-                />
+                    <input
+                        className="border border-gray-300 p-3 rounded text-gray-900"
+                        placeholder="Property Interest e.g. House in DHA"
+                        value={form.propertyInterest}
+                        onChange={(e) =>
+                            setForm({ ...form, propertyInterest: e.target.value })
+                        }
+                    />
 
-                <input
-                    className="border border-gray-300 p-3 rounded text-gray-900"
-                    placeholder="Budget e.g. 25000000"
-                    value={form.budget}
-                    onChange={(e) => setForm({ ...form, budget: e.target.value })}
-                />
+                    <input
+                        className="border border-gray-300 p-3 rounded text-gray-900"
+                        placeholder="Budget e.g. 25000000"
+                        value={form.budget}
+                        onChange={(e) => setForm({ ...form, budget: e.target.value })}
+                    />
 
-                <button className="bg-black text-white p-3 rounded col-span-full">
-                    Create Lead
-                </button>
-            </form>
+                    <button className="bg-black text-white p-3 rounded col-span-full">
+                        Create Lead
+                    </button>
+                </form>
+            )}
 
             <p className="mb-4 font-semibold">Total Leads: {leads.length}</p>
 
@@ -170,22 +184,26 @@ export default function LeadsPage() {
                                 </div>
 
                                 <div className="min-w-64">
-                                    <label className="block font-semibold mb-2">
-                                        Assign to Agent
-                                    </label>
+                                    {currentUser?.role === "admin" && (
+                                        <>
+                                            <label className="block font-semibold mb-2">
+                                                Assign to Agent
+                                            </label>
 
-                                    <select
-                                        className="border border-gray-300 p-3 rounded w-full text-gray-900 bg-white"
-                                        value={lead.assignedTo?._id || ""}
-                                        onChange={(e) => assignLead(lead._id, e.target.value)}
-                                    >
-                                        <option value="">Select Agent</option>
-                                        {agents.map((agent) => (
-                                            <option key={agent._id} value={agent._id}>
-                                                {agent.name} - {agent.email}
-                                            </option>
-                                        ))}
-                                    </select>
+                                            <select
+                                                className="border border-gray-300 p-3 rounded w-full text-gray-900 bg-white"
+                                                value={lead.assignedTo?._id || ""}
+                                                onChange={(e) => assignLead(lead._id, e.target.value)}
+                                            >
+                                                <option value="">Select Agent</option>
+                                                {agents.map((agent) => (
+                                                    <option key={agent._id} value={agent._id}>
+                                                        {agent.name} - {agent.email}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </>
+                                    )}
 
                                     <a
                                         className="block mt-3 bg-green-600 text-white text-center p-2 rounded"
