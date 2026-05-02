@@ -4,6 +4,7 @@ import { calculateLeadScore } from "@/lib/leadScoring";
 import { createActivityLog } from "@/lib/activityLogger";
 import { sendEmail } from "@/lib/email";
 import { validateLeadData } from "@/lib/validators";
+import { rateLimit } from "@/lib/rateLimiter";
 import Lead from "@/models/Lead";
 
 export async function GET() {
@@ -14,6 +15,19 @@ export async function GET() {
 
         if (!user) {
             return Response.json({ message: "Unauthorized" }, { status: 401 });
+        }
+
+        const limiter = rateLimit({
+            key: user.id,
+            limit: user.role === "admin" ? 500 : 50,
+            windowMs: 60 * 1000,
+        });
+
+        if (!limiter.allowed) {
+            return Response.json(
+                { message: "Too many requests. Please try again later." },
+                { status: 429 }
+            );
         }
 
         let leads;
@@ -47,16 +61,26 @@ export async function POST(req) {
             return Response.json({ message: "Unauthorized" }, { status: 401 });
         }
 
+        const limiter = rateLimit({
+            key: user.id,
+            limit: user.role === "admin" ? 500 : 50,
+            windowMs: 60 * 1000,
+        });
+
+        if (!limiter.allowed) {
+            return Response.json(
+                { message: "Too many requests. Please try again later." },
+                { status: 429 }
+            );
+        }
+
         const body = await req.json();
 
         const validationErrors = validateLeadData(body);
 
         if (validationErrors.length > 0) {
             return Response.json(
-                {
-                    message: "Validation failed",
-                    errors: validationErrors,
-                },
+                { message: "Validation failed", errors: validationErrors },
                 { status: 400 }
             );
         }

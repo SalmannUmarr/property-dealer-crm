@@ -4,6 +4,7 @@ import { calculateLeadScore } from "@/lib/leadScoring";
 import { createActivityLog } from "@/lib/activityLogger";
 import { sendEmail } from "@/lib/email";
 import { validateLeadData, validateStatus } from "@/lib/validators";
+import { rateLimit } from "@/lib/rateLimiter";
 import Lead from "@/models/Lead";
 import ActivityLog from "@/models/ActivityLog";
 import User from "@/models/User";
@@ -18,7 +19,20 @@ export async function GET(req, { params }) {
             return Response.json({ message: "Unauthorized" }, { status: 401 });
         }
 
-        const { id } = await params;
+        const limiter = rateLimit({
+            key: user.id,
+            limit: user.role === "admin" ? 500 : 50,
+            windowMs: 60 * 1000,
+        });
+
+        if (!limiter.allowed) {
+            return Response.json(
+                { message: "Too many requests. Please try again later." },
+                { status: 429 }
+            );
+        }
+
+        const { id } = params;
 
         const lead = await Lead.findById(id).populate("assignedTo", "name email role");
 
@@ -53,7 +67,20 @@ export async function PUT(req, { params }) {
             return Response.json({ message: "Unauthorized" }, { status: 401 });
         }
 
-        const { id } = await params;
+        const limiter = rateLimit({
+            key: user.id,
+            limit: user.role === "admin" ? 500 : 50,
+            windowMs: 60 * 1000,
+        });
+
+        if (!limiter.allowed) {
+            return Response.json(
+                { message: "Too many requests. Please try again later." },
+                { status: 429 }
+            );
+        }
+
+        const { id } = params;
         const body = await req.json();
 
         const existingLead = await Lead.findById(id);
@@ -93,10 +120,7 @@ export async function PUT(req, { params }) {
 
             if (validationErrors.length > 0) {
                 return Response.json(
-                    {
-                        message: "Validation failed",
-                        errors: validationErrors,
-                    },
+                    { message: "Validation failed", errors: validationErrors },
                     { status: 400 }
                 );
             }
@@ -183,7 +207,20 @@ export async function DELETE(req, { params }) {
             );
         }
 
-        const { id } = await params;
+        const limiter = rateLimit({
+            key: user.id,
+            limit: 500,
+            windowMs: 60 * 1000,
+        });
+
+        if (!limiter.allowed) {
+            return Response.json(
+                { message: "Too many requests. Please try again later." },
+                { status: 429 }
+            );
+        }
+
+        const { id } = params;
 
         const deletedLead = await Lead.findByIdAndDelete(id);
 
