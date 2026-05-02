@@ -2,8 +2,10 @@ import { connectDB } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { calculateLeadScore } from "@/lib/leadScoring";
 import { createActivityLog } from "@/lib/activityLogger";
+import { sendEmail } from "@/lib/email";
 import Lead from "@/models/Lead";
 import ActivityLog from "@/models/ActivityLog";
+import User from "@/models/User";
 
 export async function GET(req, { params }) {
     try {
@@ -80,6 +82,45 @@ export async function PUT(req, { params }) {
             details: `${user.name} updated lead details.`,
         });
 
+        if (body.assignedTo) {
+            const agent = await User.findById(body.assignedTo);
+
+            if (agent) {
+                await createActivityLog({
+                    lead: id,
+                    user: user.id,
+                    action: "Lead Assigned",
+                    details: `${user.name} assigned this lead to ${agent.name}.`,
+                });
+
+                await sendEmail(
+                    agent.email,
+                    "New Lead Assigned",
+                    `Hello ${agent.name},\n\nYou have been assigned a new lead: ${updatedLead.name}.\n\nPhone: ${updatedLead.phone}\nProperty Interest: ${updatedLead.propertyInterest}\nBudget: ${updatedLead.budget}\nPriority: ${updatedLead.score}\n\nPlease follow up with the client.`
+                );
+            }
+        }
+
+        if (body.status) {
+            await createActivityLog({
+                lead: id,
+                user: user.id,
+                action: "Status Updated",
+                details: `${user.name} changed lead status to ${body.status}.`,
+            });
+        }
+
+        if (body.followUpDate) {
+            await createActivityLog({
+                lead: id,
+                user: user.id,
+                action: "Follow-up Updated",
+                details: `${user.name} set follow-up date to ${new Date(
+                    body.followUpDate
+                ).toLocaleDateString()}.`,
+            });
+        }
+
         return Response.json({
             message: "Lead updated successfully",
             lead: updatedLead,
@@ -99,7 +140,10 @@ export async function DELETE(req, { params }) {
         const user = await getCurrentUser();
 
         if (!user || user.role !== "admin") {
-            return Response.json({ message: "Only admin can delete leads" }, { status: 403 });
+            return Response.json(
+                { message: "Only admin can delete leads" },
+                { status: 403 }
+            );
         }
 
         const { id } = await params;

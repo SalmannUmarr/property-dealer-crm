@@ -2,6 +2,7 @@ import { connectDB } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { calculateLeadScore } from "@/lib/leadScoring";
 import { createActivityLog } from "@/lib/activityLogger";
+import { sendEmail } from "@/lib/email";
 import Lead from "@/models/Lead";
 
 export async function GET() {
@@ -88,6 +89,12 @@ export async function POST(req) {
             action: "Lead Created",
             details: `${user.name} created a new lead with ${score} priority.`,
         });
+
+        await sendEmail(
+            user.email,
+            "New Lead Created",
+            `A new lead (${lead.name}) has been created with ${score} priority.`
+        );
 
         return Response.json(
             { message: "Lead created successfully", lead },
