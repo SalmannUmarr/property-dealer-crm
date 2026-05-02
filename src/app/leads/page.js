@@ -50,6 +50,12 @@ export default function LeadsPage() {
         fetchCurrentUser();
         fetchLeads();
         fetchAgents();
+
+        const interval = setInterval(() => {
+            fetchLeads();
+        }, 5000);
+
+        return () => clearInterval(interval);
     }, []);
 
     async function handleSubmit(e) {
@@ -102,9 +108,51 @@ export default function LeadsPage() {
         }
     }
 
+    async function updateStatus(leadId, status) {
+        const res = await fetch(`/api/leads/${leadId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ status }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            setMessage("Lead status updated successfully");
+            fetchLeads();
+        } else {
+            setMessage(data.message || "Failed to update status");
+        }
+    }
+
+    async function deleteLead(leadId) {
+        const confirmed = confirm("Are you sure you want to delete this lead?");
+
+        if (!confirmed) return;
+
+        const res = await fetch(`/api/leads/${leadId}`, {
+            method: "DELETE",
+            credentials: "include",
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            setMessage("Lead deleted successfully");
+            fetchLeads();
+        } else {
+            setMessage(data.message || "Failed to delete lead");
+        }
+    }
+
     return (
         <main className="min-h-screen bg-slate-100 p-6 text-gray-900">
             <h1 className="text-3xl font-bold mb-6">Leads Management</h1>
+
+            <p className="mb-4 text-sm text-gray-600">
+                Live updates enabled: leads refresh automatically every 5 seconds.
+            </p>
 
             {message && (
                 <div className="mb-4 bg-blue-100 text-blue-800 p-3 rounded-lg">
@@ -112,7 +160,6 @@ export default function LeadsPage() {
                 </div>
             )}
 
-            {/* CREATE LEAD (ADMIN ONLY) */}
             {currentUser?.role === "admin" && (
                 <form
                     onSubmit={handleSubmit}
@@ -134,7 +181,7 @@ export default function LeadsPage() {
 
                     <input
                         className="border border-gray-300 p-3 rounded"
-                        placeholder="Phone"
+                        placeholder="Phone e.g. 923001234567"
                         value={form.phone}
                         onChange={(e) => setForm({ ...form, phone: e.target.value })}
                     />
@@ -163,23 +210,19 @@ export default function LeadsPage() {
 
             <p className="mb-4 font-semibold">Total Leads: {leads.length}</p>
 
-            {/* LEADS LIST */}
             <div className="grid gap-4">
                 {leads.length === 0 ? (
                     <p>No leads found.</p>
                 ) : (
                     leads.map((lead) => {
                         const isOverdue =
-                            lead.followUpDate &&
-                            new Date(lead.followUpDate) < new Date();
+                            lead.followUpDate && new Date(lead.followUpDate) < new Date();
 
                         return (
                             <div
                                 key={lead._id}
                                 className={`p-5 rounded-xl shadow border ${
-                                    isOverdue
-                                        ? "bg-red-50 border-red-400"
-                                        : "bg-white"
+                                    isOverdue ? "bg-red-50 border-red-400" : "bg-white"
                                 }`}
                             >
                                 <div className="flex justify-between gap-4 flex-wrap">
@@ -191,20 +234,14 @@ export default function LeadsPage() {
                                         <p>Budget: {lead.budget}</p>
                                         <p>Status: {lead.status}</p>
                                         <p className="font-bold">Priority: {lead.score}</p>
-
                                         <p>
                                             Assigned To:{" "}
-                                            {lead.assignedTo
-                                                ? lead.assignedTo.name
-                                                : "Unassigned"}
+                                            {lead.assignedTo ? lead.assignedTo.name : "Unassigned"}
                                         </p>
-
                                         <p>
                                             Follow-up:{" "}
                                             {lead.followUpDate
-                                                ? new Date(
-                                                    lead.followUpDate
-                                                ).toLocaleDateString()
+                                                ? new Date(lead.followUpDate).toLocaleDateString()
                                                 : "Not set"}
                                             {isOverdue && (
                                                 <span className="text-red-600 font-bold">
@@ -216,7 +253,6 @@ export default function LeadsPage() {
                                     </div>
 
                                     <div className="min-w-64">
-                                        {/* ADMIN ONLY */}
                                         {currentUser?.role === "admin" && (
                                             <>
                                                 <label className="block font-semibold mb-2">
@@ -226,9 +262,7 @@ export default function LeadsPage() {
                                                 <select
                                                     className="border border-gray-300 p-3 rounded w-full bg-white"
                                                     value={lead.assignedTo?._id || ""}
-                                                    onChange={(e) =>
-                                                        assignLead(lead._id, e.target.value)
-                                                    }
+                                                    onChange={(e) => assignLead(lead._id, e.target.value)}
                                                 >
                                                     <option value="">Select Agent</option>
                                                     {agents.map((agent) => (
@@ -239,6 +273,23 @@ export default function LeadsPage() {
                                                 </select>
                                             </>
                                         )}
+
+                                        <label className="block font-semibold mt-3 mb-2">
+                                            Update Status
+                                        </label>
+
+                                        <select
+                                            className="border border-gray-300 p-3 rounded w-full bg-white"
+                                            value={lead.status}
+                                            onChange={(e) => updateStatus(lead._id, e.target.value)}
+                                        >
+                                            <option value="New">New</option>
+                                            <option value="Assigned">Assigned</option>
+                                            <option value="Contacted">Contacted</option>
+                                            <option value="In Progress">In Progress</option>
+                                            <option value="Closed">Closed</option>
+                                            <option value="Lost">Lost</option>
+                                        </select>
 
                                         <a
                                             className="block mt-3 bg-green-600 text-white text-center p-2 rounded"
@@ -254,6 +305,15 @@ export default function LeadsPage() {
                                         >
                                             View Timeline
                                         </a>
+
+                                        {currentUser?.role === "admin" && (
+                                            <button
+                                                onClick={() => deleteLead(lead._id)}
+                                                className="block mt-3 bg-red-600 text-white text-center p-2 rounded w-full"
+                                            >
+                                                Delete Lead
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>
