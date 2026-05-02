@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { calculateLeadScore } from "@/lib/leadScoring";
 import { createActivityLog } from "@/lib/activityLogger";
 import { sendEmail } from "@/lib/email";
+import { validateLeadData, validateStatus } from "@/lib/validators";
 import Lead from "@/models/Lead";
 import ActivityLog from "@/models/ActivityLog";
 import User from "@/models/User";
@@ -63,6 +64,42 @@ export async function PUT(req, { params }) {
 
         if (user.role === "agent" && String(existingLead.assignedTo) !== user.id) {
             return Response.json({ message: "Forbidden" }, { status: 403 });
+        }
+
+        if (body.status && !validateStatus(body.status)) {
+            return Response.json(
+                { message: "Invalid lead status" },
+                { status: 400 }
+            );
+        }
+
+        if (
+            body.budget ||
+            body.name ||
+            body.phone ||
+            body.propertyInterest ||
+            body.email
+        ) {
+            const mergedData = {
+                name: body.name || existingLead.name,
+                phone: body.phone || existingLead.phone,
+                email: body.email || existingLead.email,
+                propertyInterest:
+                    body.propertyInterest || existingLead.propertyInterest,
+                budget: body.budget || existingLead.budget,
+            };
+
+            const validationErrors = validateLeadData(mergedData);
+
+            if (validationErrors.length > 0) {
+                return Response.json(
+                    {
+                        message: "Validation failed",
+                        errors: validationErrors,
+                    },
+                    { status: 400 }
+                );
+            }
         }
 
         if (body.budget) {

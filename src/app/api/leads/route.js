@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { calculateLeadScore } from "@/lib/leadScoring";
 import { createActivityLog } from "@/lib/activityLogger";
 import { sendEmail } from "@/lib/email";
+import { validateLeadData } from "@/lib/validators";
 import Lead from "@/models/Lead";
 
 export async function GET() {
@@ -48,6 +49,18 @@ export async function POST(req) {
 
         const body = await req.json();
 
+        const validationErrors = validateLeadData(body);
+
+        if (validationErrors.length > 0) {
+            return Response.json(
+                {
+                    message: "Validation failed",
+                    errors: validationErrors,
+                },
+                { status: 400 }
+            );
+        }
+
         const {
             name,
             email,
@@ -59,13 +72,6 @@ export async function POST(req) {
             assignedTo,
             followUpDate,
         } = body;
-
-        if (!name || !phone || !propertyInterest || !budget) {
-            return Response.json(
-                { message: "Name, phone, property interest and budget are required" },
-                { status: 400 }
-            );
-        }
 
         const score = calculateLeadScore(budget);
 
