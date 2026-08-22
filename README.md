@@ -1,22 +1,20 @@
-Here’s a **clean, professional README.md** you can paste directly into your GitHub repo.
-
 ---
 
-# 🏠 Property Dealer CRM System
+# Property Dealer CRM System
 
 A full-stack **Customer Relationship Management (CRM)** system built using **Next.js (App Router)** and **MongoDB** for managing property leads, agent assignments, and analytics.
 
 ---
 
-## 🚀 Features
+## Features
 
-### 🔐 Authentication
+### Authentication
 
 * User Signup & Login
 * Password hashing using **bcrypt**
 * JWT-based authentication (stored in cookies)
 
-### 👤 Role-Based Access Control (RBAC)
+### Role-Based Access Control (RBAC)
 
 * **Admin**
 
@@ -32,7 +30,7 @@ A full-stack **Customer Relationship Management (CRM)** system built using **Nex
 
 ---
 
-### 📋 Lead Management
+### Lead Management
 
 * Create, view, and manage leads
 * Lead information includes:
@@ -45,7 +43,7 @@ A full-stack **Customer Relationship Management (CRM)** system built using **Nex
 
 ---
 
-### ⭐ Lead Scoring
+### Lead Scoring
 
 Leads are automatically categorized based on budget:
 
@@ -55,20 +53,20 @@ Leads are automatically categorized based on budget:
 
 ---
 
-### 🔄 Lead Assignment
+### Lead Assignment
 
 * Admin can assign leads to agents
 * Agents only see their assigned leads
 
 ---
 
-### 💬 WhatsApp Integration
+### WhatsApp Integration
 
 * One-click WhatsApp chat with leads
 
 ---
 
-### 📜 Activity Timeline
+### Activity Timeline
 
 * Track all actions:
 
@@ -78,14 +76,14 @@ Leads are automatically categorized based on budget:
 
 ---
 
-### ⏰ Follow-Up System
+### Follow-Up System
 
 * Set follow-up dates
 * Overdue leads highlighted in red
 
 ---
 
-### 📊 Analytics Dashboard (Admin)
+### Analytics Dashboard (Admin)
 
 * Total leads
 * Priority distribution
@@ -94,7 +92,7 @@ Leads are automatically categorized based on budget:
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 * **Frontend:** Next.js (App Router), Tailwind CSS
 * **Backend:** Next.js API Routes
@@ -106,7 +104,7 @@ Leads are automatically categorized based on budget:
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 src/
@@ -130,7 +128,7 @@ src/
 
 ---
 
-## ⚙️ Environment Variables
+## Environment Variables
 
 Create a `.env.local` file:
 
@@ -142,7 +140,7 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 
 ---
 
-## ▶️ Running Locally
+## Running Locally
 
 ```bash
 npm install
@@ -157,7 +155,7 @@ http://localhost:3000
 
 ---
 
-## 🌐 Deployment
+## Deployment
 
 Deployed using **Vercel**:
 
@@ -168,7 +166,7 @@ Deployed using **Vercel**:
 
 ---
 
-## 🧠 Future Improvements
+## Future Improvements
 
 * Email notifications on lead assignment
 * Real-time updates (polling / sockets)
@@ -177,7 +175,7 @@ Deployed using **Vercel**:
 
 ---
 
-## 📌 Git Workflow
+## Git Workflow
 
 * Feature-based branching
 * Regular commits
@@ -194,20 +192,20 @@ git push -u origin feature/feature-name
 
 ---
 
-## 👨‍💻 Author
+## Author
 
 **Salman Umar**
 BS Computer Science
 
 ---
 
-## 📄 License
+## License
 
 This project is for academic purposes.
 
 ---
 
-## ⭐ Final Note
+## Final Note
 
 This project demonstrates:
 
